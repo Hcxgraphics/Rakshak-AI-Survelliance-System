@@ -1,0 +1,13 @@
+train: C:/Users/Acer/Desktop/weaponnn/train/images
+val: C:/Users/Acer/Desktop/weaponnn/valid/images
+test: C:/Users/Acer/Desktop/weaponnn/test/images
+
+nc: 4
+names: ['0', '1', '2', '3']
+
+roboflow:
+  workspace: iubat-zbw1i
+  project: weapondetection-rcs4t
+  version: 9
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/iubat-zbw1i/weapondetection-rcs4t/dataset/9

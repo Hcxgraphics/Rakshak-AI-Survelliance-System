@@ -1,0 +1,100 @@
+```gitignore id="b0yc0g"
+# =========================
+# OS / Editor
+# =========================
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# =========================
+# Python cache / build
+# =========================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# =========================
+# Virtual environments
+# =========================
+.venv/
+venv/
+env/
+yolovenv/
+rtdetr_env/
+*/.venv/
+*/venv/
+*/env/
+*/yolovenv/
+*/rtdetr_env/
+
+# =========================
+# Logs / experiment outputs
+# =========================
+*.log
+runs/
+wandb/
+mlruns/
+
+# =========================
+# Temporary outputs
+# =========================
+temp.mp4
+OUTPUT/
+output/
+outputs/
+assets/outputs/**
+!assets/outputs/.gitkeep
+
+# =========================
+# Dataset dumps / archives
+# =========================
+*.zip
+*.tar
+*.tar.gz
+*.7z
+*.npy
+*.npz
+*.csv
+
+datasets/**
+!datasets/**/
+!datasets/**/.gitkeep
+
+# =========================
+# Temporary media
+# =========================
+*.tmp
+*.temp
+
+# =========================
+# Ignore checkpoint variants
+# Keep only curated final models
+# =========================
+checkpoints/
+*.ckpt
+*.weights
+
+# =========================
+# IMPORTANT:
+# Do NOT globally ignore:
+# *.pt *.pth *.h5
+# because final trained models should be trackable
+# =========================
+
+# =========================
+# Optional: ignore only generated media
+# while keeping sample assets
+# =========================
+*.mp3
+*.mp4
+```

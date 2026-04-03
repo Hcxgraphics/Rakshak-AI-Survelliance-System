@@ -1,0 +1,61 @@
+__include__:
+  - ../runtime.yml
+  - ./include/dataloader.yml
+  - ./include/optimizer.yml
+  - ./include/rtdetr_r50vd.yml
+
+task: detection
+num_classes: 5
+remap_mscoco_category: False
+output_dir: ./output/police_rtdetr_r50vd
+
+train_dataloader:
+  type: DataLoader
+  dataset:
+    _name: CocoDetection
+    type: CocoDetection
+    img_folder: ../../DangePolice_coco/train2017
+    ann_file: ../../DangePolice_coco/annotations/instances_train2017_normalized.json
+    return_masks: False
+    remap_mscoco_category: False
+    transforms:
+      _name: Compose
+      type: Compose
+      ops:
+        - {type: RandomPhotometricDistort, p: 0.5}
+        - {type: RandomZoomOut, fill: 0}
+        - {type: RandomHorizontalFlip}
+        - {type: Resize, size: [640, 640]}
+        - {type: ToImageTensor}
+        - {type: ConvertBox, out_fmt: cxcywh, normalize: True}
+  shuffle: True
+  batch_size: 4
+  num_workers: 4
+  collate_fn: default_collate_fn
+
+val_dataloader:
+  type: DataLoader
+  dataset:
+    _name: CocoDetection
+    type: CocoDetection
+    img_folder: ../../DangePolice_coco/val2017
+    ann_file: ../../DangePolice_coco/annotations/instances_val2017_normalized.json
+    return_masks: False
+    remap_mscoco_category: False
+    transforms:
+      _name: Compose
+      type: Compose
+      ops:
+        - {type: Resize, size: [640, 640]}
+        - {type: ToImageTensor}
+        - {type: ConvertBox, out_fmt: cxcywh, normalize: True}
+  shuffle: False
+  batch_size: 4
+  num_workers: 4
+  collate_fn: default_collate_fn
+
+RTDETR_R50VD:
+  num_classes: 5
+
+# Use `-t ../../rtdetr_r50vd_6x_coco_from_paddle.pth` when fine-tuning from the
+# provided checkpoint; the solver skips unmatched classification heads safely.

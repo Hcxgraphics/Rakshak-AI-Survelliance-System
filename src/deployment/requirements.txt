@@ -1,0 +1,13 @@
+fastapi==0.115.0
+numpy==1.26.4
+opencv-python==4.10.0.84
+Pillow==10.4.0
+python-multipart==0.0.9
+requests==2.32.3
+scikit-learn==1.5.2
+streamlit==1.39.0
+tensorflow==2.15.1
+torch==2.4.1
+torchvision==0.19.1
+ultralytics==8.3.0
+uvicorn[standard]==0.30.6

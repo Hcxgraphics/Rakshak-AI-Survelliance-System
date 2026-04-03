@@ -1,0 +1,49 @@
+import json
+import os
+
+# Paths to your COCO annotation files
+json_paths = [
+    r"D:/mISC/Team chocos/Codes/PoliceUniDetect/DangePolice_coco/annotations/instances_train2017_clean.json",
+    r"D:/mISC/Team chocos/Codes/PoliceUniDetect/DangePolice_coco/annotations/instances_val2017.json",
+    r"D:/mISC/Team chocos/Codes/PoliceUniDetect/DangePolice_coco/annotations/instances_test2017.json",
+]
+
+def clean_and_remap_coco_categories(json_path):
+    with open(json_path, 'r') as f:
+        data = json.load(f)
+
+    # Step 1: Remove category with id == 0 (junk)
+    categories = [cat for cat in data["categories"] if cat["id"] != 0]
+
+    # Step 2: Reassign category IDs starting from 1
+    old_to_new_id = {}
+    new_categories = []
+    for i, cat in enumerate(categories):
+        new_id = i + 1  # Start from 1
+        old_to_new_id[cat["id"]] = new_id
+        cat["id"] = new_id
+        new_categories.append(cat)
+
+    # Step 3: Remap annotation category_ids
+    new_annotations = []
+    for ann in data["annotations"]:
+        old_id = ann["category_id"]
+        if old_id not in old_to_new_id:
+            continue  # skip junk
+        ann["category_id"] = old_to_new_id[old_id]
+        new_annotations.append(ann)
+
+    # Step 4: Save updated file
+    data["categories"] = new_categories
+    data["annotations"] = new_annotations
+
+    # Optional backup
+    # os.rename(json_path, json_path.replace(".json", "_original.json"))
+
+    with open(json_path, 'w') as f:
+        json.dump(data, f, indent=2)
+    print(f"✅ Cleaned and saved: {json_path}")
+
+# Apply to all annotation files
+for path in json_paths:
+    clean_and_remap_coco_categories(path)
