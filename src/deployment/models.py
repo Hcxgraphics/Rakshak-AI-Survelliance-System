@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import json
 import logging
 import os
+import shutil
+import tempfile
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
@@ -9,11 +12,11 @@ from urllib.error import URLError
 
 import tensorflow as tf
 import torch
+import h5py
 from PIL import Image
 from tensorflow.keras.models import load_model as keras_load_model
 from torchvision import transforms
 from torchvision.models import MobileNet_V2_Weights, mobilenet_v2
-from ultralytics import YOLO
 
 from accidentModel import load_accident_model
 
@@ -22,9 +25,16 @@ LOGGER = logging.getLogger(__name__)
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 MODELS_DIR = PROJECT_ROOT / "models"
 TORCH_CACHE_DIR = Path.home() / ".cache" / "torch" / "hub" / "checkpoints"
+ULTRALYTICS_CONFIG_DIR = PROJECT_ROOT / ".ultralytics"
+ULTRALYTICS_CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+os.environ.setdefault("YOLO_CONFIG_DIR", str(ULTRALYTICS_CONFIG_DIR))
+
+from ultralytics import YOLO  # noqa: E402
 
 POLICE_CLASS_NAMES = ["NonViolence", "Violence", "guns", "knife", "police"]
 ACCIDENT_CLASS_NAMES = ["class_0", "class_1", "class_2", "class_3", "class_4", "class_5"]
+POLICE_INPUT_SIZE = 224
+ACCIDENT_INPUT_SIZE = 224
 
 
 def _resolve_model_path(env_name: str, default_name: str) -> Path:
@@ -43,6 +53,85 @@ def _resolve_optional_path(env_name: str, default_path: Path | None = None) -> P
             candidate = (PROJECT_ROOT / candidate).resolve()
         return candidate
     return default_path
+
+
+def _is_git_lfs_pointer(path: Path) -> bool:
+    try:
+        with path.open("rb") as file:
+            return file.read(64).startswith(b"version https://git-lfs.github.com/spec")
+    except OSError:
+        return False
+
+
+def _validate_model_file(path: Path) -> None:
+    if not path.exists():
+        raise FileNotFoundError(f"Required model file not found: {path}")
+    if _is_git_lfs_pointer(path):
+        raise RuntimeError(
+            f"Model file is a Git LFS pointer, not real weights: {path}. "
+            "Install Git LFS and run `git lfs pull`, or replace this file with the actual model binary."
+        )
+
+
+def _patch_legacy_keras_config(node: object) -> bool:
+    patched = False
+    if isinstance(node, dict):
+        if node.get("class_name") == "InputLayer":
+            config = node.get("config")
+            if isinstance(config, dict) and "batch_shape" in config:
+                batch_shape = config.pop("batch_shape")
+                config.setdefault("batch_input_shape", batch_shape)
+                patched = True
+        for key, value in list(node.items()):
+            if isinstance(value, dict) and value.get("class_name") == "DTypePolicy":
+                config = value.get("config")
+                if isinstance(config, dict) and isinstance(config.get("name"), str):
+                    node[key] = config["name"]
+                    patched = True
+                    continue
+            patched = _patch_legacy_keras_config(value) or patched
+    elif isinstance(node, list):
+        for value in node:
+            patched = _patch_legacy_keras_config(value) or patched
+    return patched
+
+
+def _load_keras_model(path: Path) -> tf.keras.Model:
+    try:
+        return keras_load_model(str(path), compile=False)
+    except Exception as exc:
+        if "DTypePolicy" in str(exc) or "as_list" in str(exc):
+            raise RuntimeError(
+                f"Keras checkpoint is incompatible with the installed TensorFlow/Keras runtime: {path}. "
+                "Install the project requirements so TensorFlow 2.19.0 and Keras 3.10.0 are used."
+            ) from exc
+        if "batch_shape" not in str(exc) and "DTypePolicy" not in str(exc):
+            raise
+
+        LOGGER.warning("Patching legacy Keras config for %s", path)
+        with tempfile.NamedTemporaryFile(suffix=path.suffix, delete=False) as handle:
+            patched_path = Path(handle.name)
+        shutil.copy2(path, patched_path)
+        try:
+            with h5py.File(patched_path, "r+") as h5_file:
+                raw_config = h5_file.attrs.get("model_config")
+                if raw_config is None:
+                    raise RuntimeError(f"Keras model has no model_config: {path}") from exc
+                if isinstance(raw_config, bytes):
+                    raw_config = raw_config.decode("utf-8")
+                model_config = json.loads(raw_config)
+                if not _patch_legacy_keras_config(model_config):
+                    raise RuntimeError(f"No legacy Keras config entries found in: {path}") from exc
+                h5_file.attrs.modify("model_config", json.dumps(model_config).encode("utf-8"))
+            try:
+                return keras_load_model(str(patched_path), compile=False)
+            except Exception as patched_exc:
+                raise RuntimeError(
+                    f"Keras checkpoint is incompatible with the installed TensorFlow/Keras runtime: {path}. "
+                    "Install the project requirements so TensorFlow 2.19.0 and Keras 3.10.0 are used."
+                ) from patched_exc
+        finally:
+            patched_path.unlink(missing_ok=True)
 
 
 @dataclass(frozen=True)
@@ -88,28 +177,26 @@ def load_models() -> DeploymentModels:
     for field_name, path in paths.__dict__.items():
         if path is None and field_name == "police_backbone_weights":
             continue
-        if not Path(path).exists():
-            raise FileNotFoundError(f"Required model file not found: {path}")
+        _validate_model_file(Path(path))
 
     LOGGER.info("Loading deployment models from %s", MODELS_DIR)
 
     weapon_model = YOLO(str(paths.weapon))
-    violence_model = keras_load_model(str(paths.violence), compile=False)
-    police_head = keras_load_model(str(paths.police), compile=False)
+    violence_model = _load_keras_model(paths.violence)
+    police_head = _load_keras_model(paths.police)
     police_backbone = _load_police_backbone(device, paths.police_backbone_weights)
     accident_model = load_accident_model(paths.accident, device=device)
 
     police_transform = transforms.Compose(
         [
-            transforms.Resize((224, 224)),
+            transforms.Resize((POLICE_INPUT_SIZE, POLICE_INPUT_SIZE)),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         ]
     )
     transform_accident = transforms.Compose(
         [
-            transforms.ToPILImage(),
-            transforms.Resize((224, 224)),
+            transforms.Resize((ACCIDENT_INPUT_SIZE, ACCIDENT_INPUT_SIZE)),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         ]

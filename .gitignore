@@ -1,15 +1,10 @@
-```gitignore id="b0yc0g"
-# =========================
-# OS / Editor
-# =========================
+# OS / editor
 .DS_Store
 Thumbs.db
 .idea/
 .vscode/
 
-# =========================
 # Python cache / build
-# =========================
 __pycache__/
 *.py[cod]
 *.pyo
@@ -23,9 +18,7 @@ dist/
 .ruff_cache/
 .ipynb_checkpoints/
 
-# =========================
 # Virtual environments
-# =========================
 .venv/
 venv/
 env/
@@ -37,17 +30,23 @@ rtdetr_env/
 */yolovenv/
 */rtdetr_env/
 
-# =========================
-# Logs / experiment outputs
-# =========================
+# Frontend
+node_modules/
+frontend/node_modules/
+frontend/dist/
+
+# Logs / generated runtime output
 *.log
+logs/*
+!logs/.gitkeep
+evidence/*
+!evidence/.gitkeep
+.ultralytics/
 runs/
 wandb/
 mlruns/
 
-# =========================
 # Temporary outputs
-# =========================
 temp.mp4
 OUTPUT/
 output/
@@ -55,9 +54,7 @@ outputs/
 assets/outputs/**
 !assets/outputs/.gitkeep
 
-# =========================
 # Dataset dumps / archives
-# =========================
 *.zip
 *.tar
 *.tar.gz
@@ -65,36 +62,17 @@ assets/outputs/**
 *.npy
 *.npz
 *.csv
-
 datasets/**
 !datasets/**/
 !datasets/**/.gitkeep
 
-# =========================
 # Temporary media
-# =========================
 *.tmp
 *.temp
+*.mp3
+*.mp4
 
-# =========================
-# Ignore checkpoint variants
-# Keep only curated final models
-# =========================
+# Ignore checkpoint variants but keep final curated model formats trackable.
 checkpoints/
 *.ckpt
 *.weights
-
-# =========================
-# IMPORTANT:
-# Do NOT globally ignore:
-# *.pt *.pth *.h5
-# because final trained models should be trackable
-# =========================
-
-# =========================
-# Optional: ignore only generated media
-# while keeping sample assets
-# =========================
-*.mp3
-*.mp4
-```
