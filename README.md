@@ -426,8 +426,8 @@ set POLICE_BACKBONE_WEIGHTS=models/police/mobilenet_v2-b0353104.pth
 
 | Name | Role |
 |---|---|
-| Team Chocos | AI Research & Development |
-| Rakshak Project | Intelligent Public Safety Surveillance |
+|**HC**| AI / ML Engineer , Computer Vision , Deep Learning|
+
 
 ---
 
