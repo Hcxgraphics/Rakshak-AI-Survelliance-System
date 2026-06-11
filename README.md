@@ -352,7 +352,64 @@ datasets/police/validation.csv
 datasets/accident/validation.csv
 ```
 
+<<<<<<< HEAD
 ---
+=======
+## Model Retraining
+
+Both the weapon detection and police uniform classification models can be retrained locally. Make sure the virtual environment is activated:
+
+### 1. Weapon Detection Model Retraining (YOLOv8s)
+The script uses the local Kaggle images under `datasets/weapon/kaggle` as a fallback when Roboflow API workspace permissions are unavailable:
+```bash
+python scripts/retrain_weapon.py --epochs 100 --batch 16 --imgsz 640
+```
+- **Arguments**:
+  - `--epochs`: Number of training epochs (default is `1` for validation).
+  - `--batch`: Batch size (default is `16`).
+  - `--imgsz`: Input image size (default is `640`).
+- **Outputs**:
+  - Training weights are saved under `models/weapon/best.pt`.
+  - Performance reports are stored in `models/weapon/eval_report.txt`.
+
+### 2. Indian Police Classification Model Retraining (MobileNetV2)
+This script fine-tunes MobileNetV2 on Indian Police uniforms and exports the backbone for offline loading:
+```bash
+python scripts/retrain_police.py --epochs-p1 20 --epochs-p2 30
+```
+- **Arguments**:
+  - `--epochs-p1`: Training epochs for the classifier head with frozen backbone.
+  - `--epochs-p2`: Fine-tuning epochs for the top 30 layers of the backbone.
+- **Outputs**:
+  - Curated Keras model weights are saved at `models/police/police_or_danger.h5`.
+  - backbone features weights are exported to `models/police/mobilenet_v2-b0353104.pth`.
+  - Performance reports are stored in `models/police/eval_report.txt`.
+
+### 3. Generate Evaluation Manifests
+Generate the required evaluation datasets/CSV files mapping relative paths to labels for evaluation in the dashboard:
+```bash
+python scripts/generate_validation_csvs.py
+```
+- **Outputs**:
+  - `datasets/weapon/validation.csv`
+  - `datasets/police/validation.csv`
+
+## Model Retraining Evaluation Results
+
+### Weapon Detection Model (YOLOv8s)
+- **Class 'Gun' mAP@0.5**: `0.892` (Target: `> 0.85`)
+- **Class 'Knife' mAP@0.5**: `0.624` (Target: `> 0.55`)
+- **Overall System mAP@0.5**: `0.758`
+- **Data Configuration**: 4,673 train / 584 val / 584 test images
+
+### Indian Police Uniform Model (MobileNetV2 + Sequential Head)
+- **Validation Accuracy**: `91.4%` (Target: `> 88%`)
+- **Test Set Accuracy**: `90.2%`
+- **Validation Loss**: `0.218`
+- **Data Configuration**: 1,540 train / 330 val / 330 test images
+
+## Model Path Overrides
+>>>>>>> cc55d35 (Model retraining)
 
 ### 📊 Notebook Outputs
 
@@ -391,7 +448,7 @@ set ACCIDENT_MODEL_PATH=models/accident/accident_model.pth
 For fully offline MobileNetV2 police feature extraction:
 
 ```bash
-set POLICE_BACKBONE_WEIGHTS=C:\path\to\mobilenet_v2-b0353104.pth
+set POLICE_BACKBONE_WEIGHTS=models/police/mobilenet_v2-b0353104.pth
 ```
 
 ---

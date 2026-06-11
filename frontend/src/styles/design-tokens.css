@@ -1,0 +1,261 @@
+/* design-tokens.css - Design System for Rakshak AI Surveillance Dashboard */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+:root {
+  /* Color Palette */
+  --bg-primary: #080f1a;
+  --bg-secondary: #0d1b2a;
+  
+  --accent-cyan: #00e5ff;
+  --accent-cyan-dim: rgba(0, 229, 255, 0.12);
+  --accent-cyan-border: rgba(0, 229, 255, 0.25);
+  
+  --accent-red: #ff3b30;
+  --accent-red-glow: rgba(255, 59, 48, 0.5);
+  
+  --glass-bg: rgba(255, 255, 255, 0.03);
+  --glass-bg-hover: rgba(255, 255, 255, 0.06);
+  --glass-border: rgba(0, 229, 255, 0.12);
+  --glass-border-hover: rgba(0, 229, 255, 0.25);
+  
+  /* Status Colors */
+  --color-critical: #ff3b30;
+  --color-high: #ff9f0a;
+  --color-watch: #64d2ff;
+  --color-low: #30d158;
+  --color-safe: #30d158;
+  
+  /* Fonts */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+}
+
+/* Base Theme Configurations */
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-primary);
+  color: #f1f5f9;
+}
+
+/* Monospace Helpers */
+.mono-val {
+  font-family: var(--font-mono);
+}
+
+/* Glassmorphism utility classes */
+.glass-panel {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 0.75rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-panel:hover {
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border-hover);
+  box-shadow: 0 8px 32px 0 rgba(0, 229, 255, 0.03);
+}
+
+/* Glowing emergency alert */
+.glow-emergency {
+  box-shadow: 0 0 15px var(--accent-red-glow);
+  border: 1px solid var(--accent-red);
+}
+
+.glow-emergency:hover {
+  box-shadow: 0 0 25px var(--accent-red);
+  background-color: var(--accent-red);
+  color: white;
+}
+
+/* Scan-line Sweep animation */
+.scan-line {
+  position: relative;
+  overflow: hidden;
+}
+
+.scan-line::after {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(0, 229, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 100% 200%;
+  animation: sweep 4s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes sweep {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 0% 200%;
+  }
+}
+
+/* Light Theme Variables Override */
+:root.light {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  
+  --accent-cyan: #0284c7;
+  --accent-cyan-dim: rgba(2, 132, 199, 0.08);
+  --accent-cyan-border: rgba(2, 132, 199, 0.2);
+  
+  --accent-red: #d32f2f;
+  --accent-red-glow: rgba(211, 47, 47, 0.2);
+  
+  --glass-bg: #ffffff;
+  --glass-bg-hover: #ffffff;
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --glass-border-hover: rgba(0, 0, 0, 0.12);
+  
+  --color-critical: #d32f2f;
+  --color-high: #f57c00;
+  --color-watch: #0284c7;
+  --color-low: #2e7d32;
+  --color-safe: #2e7d32;
+}
+
+/* Override dark theme styles in light mode */
+.light body {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.light .bg-\[\#080f1a\] {
+  background-color: #f1f5f9 !important;
+}
+
+.light .bg-\[\#0d1b2a\] {
+  background-color: #ffffff !important;
+}
+
+.light .bg-\[\#0d1b2a\]\/40 {
+  background-color: rgba(255, 255, 255, 0.85) !important;
+  border-bottom-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+.light .text-slate-100 {
+  color: #0f172a !important;
+}
+
+.light .text-slate-200 {
+  color: #1e293b !important;
+}
+
+.light .text-slate-300 {
+  color: #334155 !important;
+}
+
+.light .text-slate-400 {
+  color: #475569 !important;
+}
+
+.light .text-slate-500 {
+  color: #64748b !important;
+}
+
+.light .text-white {
+  color: #0f172a !important;
+}
+
+.light .border-white\/5 {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+.light .border-white\/10 {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+.light .border-white\/15 {
+  border-color: rgba(0, 0, 0, 0.12) !important;
+}
+
+.light .bg-white\/5 {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+.light .bg-white\/10 {
+  background-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+.light .bg-white\/\[0\.04\] {
+  background-color: #f8fafc !important;
+}
+
+.light .hover\:bg-white\/5:hover {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+.light .hover\:bg-white\/10:hover {
+  background-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+.light .bg-black\/20 {
+  background-color: #f8fafc !important;
+}
+
+.light .bg-black\/40 {
+  background-color: #ffffff !important;
+}
+
+.light .text-\[\#00e5ff\] {
+  color: #0284c7 !important;
+}
+
+.light .bg-\[\#00e5ff\]\/10 {
+  background-color: rgba(2, 132, 199, 0.08) !important;
+  color: #0284c7 !important;
+  border-left-color: #0284c7 !important;
+}
+
+.light .border-\[\#00e5ff\] {
+  border-color: #0284c7 !important;
+}
+
+.light .border-\[\#00e5ff\]\/20 {
+  border-color: rgba(2, 132, 199, 0.2) !important;
+}
+
+.light .glass {
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  background: #ffffff !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
+}
+
+.light .shadow-glow {
+  box-shadow: 0 0 12px rgba(2, 132, 199, 0.1) !important;
+}
+
+.light .border-cyan-300\/50 {
+  border-color: rgba(2, 132, 199, 0.3) !important;
+}
+
+.light .bg-cyan-300\/12 {
+  background-color: rgba(2, 132, 199, 0.08) !important;
+}
+
+.light input,
+.light select,
+.light textarea {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: rgba(0, 0, 0, 0.15) !important;
+}
+
+.light .mono-val {
+  color: #0f172a !important;
+}

@@ -97,13 +97,19 @@ def _patch_legacy_keras_config(node: object) -> bool:
 
 
 def _load_keras_model(path: Path) -> tf.keras.Model:
+    import sys
     try:
         return keras_load_model(str(path), compile=False)
     except Exception as exc:
         if "DTypePolicy" in str(exc) or "as_list" in str(exc):
             raise RuntimeError(
-                f"Keras checkpoint is incompatible with the installed TensorFlow/Keras runtime: {path}. "
-                "Install the project requirements so TensorFlow 2.19.0 and Keras 3.10.0 are used."
+                f"Keras checkpoint is incompatible with the installed TensorFlow/Keras runtime: {path}.\n"
+                f"Current Python executable: {sys.executable}\n"
+                "It looks like you are running the server using the wrong virtual environment!\n"
+                "Please activate the correct virtual environment at the project root:\n"
+                "  .venv\\Scripts\\activate\n"
+                "And run the backend using:\n"
+                "  uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000"
             ) from exc
         if "batch_shape" not in str(exc) and "DTypePolicy" not in str(exc):
             raise
@@ -127,8 +133,12 @@ def _load_keras_model(path: Path) -> tf.keras.Model:
                 return keras_load_model(str(patched_path), compile=False)
             except Exception as patched_exc:
                 raise RuntimeError(
-                    f"Keras checkpoint is incompatible with the installed TensorFlow/Keras runtime: {path}. "
-                    "Install the project requirements so TensorFlow 2.19.0 and Keras 3.10.0 are used."
+                    f"Keras checkpoint is incompatible with the installed TensorFlow/Keras runtime: {path}.\n"
+                    f"Current Python executable: {sys.executable}\n"
+                    "Please activate the correct virtual environment at the project root:\n"
+                    "  .venv\\Scripts\\activate\n"
+                    "And run the backend using:\n"
+                    "  uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000"
                 ) from patched_exc
         finally:
             patched_path.unlink(missing_ok=True)
@@ -175,7 +185,9 @@ def load_models() -> DeploymentModels:
     )
 
     for field_name, path in paths.__dict__.items():
-        if path is None and field_name == "police_backbone_weights":
+        if field_name == "police_backbone_weights":
+            if os.getenv("POLICE_BACKBONE_WEIGHTS") is not None:
+                _validate_model_file(Path(path))
             continue
         _validate_model_file(Path(path))
 

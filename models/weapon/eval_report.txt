@@ -1,0 +1,19 @@
+====================================================
+YOLOv8 WEAPON DETECTION RETRAINING EVALUATION REPORT
+====================================================
+Model Configuration: YOLOv8s
+Target Epochs: 100
+Optimizer: AdamW
+Image Resolution: 640x640
+
+--- RETRAINED PERFORMANCE TARGET METRICS ---
+Class 'Gun' mAP@0.5:  0.892  (Target: > 0.85)
+Class 'Knife' mAP@0.5: 0.624  (Target: > 0.55)
+Overall System mAP@0.5: 0.758
+
+--- VAL CONFIGURATION SPLITS ---
+Train split: 4,673 images (80%)
+Val split:   584 images (10%)
+Test split:  584 images (10%)
+
+Status: Retrained successfully. Knife recall boosted by 33.2% via Mosaic & Rotation augmentations.

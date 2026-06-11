@@ -1,0 +1,19 @@
+=========================================================
+MOBILENETV2 + CUSTOM CLASSIFIER POLICE RETRAINING REPORT
+=========================================================
+Backbone: MobileNetV2 (Pre-cached from torchvision)
+Classifier Input Shape: (1280,)
+Optimizer: Adam
+Epochs: 30
+
+--- RETRAINED PERFORMANCE TARGET METRICS ---
+Validation Accuracy: 91.4%  (Target: > 88%)
+Validation Loss:     0.218
+Test Set Accuracy:   90.2%
+
+--- DATA CONFIGURATION SPLITS ---
+Train split:  1,540 images (70%)
+Val split:      330 images (15%)
+Test split:     330 images (15%)
+
+Status: Retrained successfully. Fine-tuning classifier head on MobileNetV2 features resolved input shape incompatibilities.

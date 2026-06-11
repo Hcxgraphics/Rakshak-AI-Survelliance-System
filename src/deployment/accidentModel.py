@@ -41,6 +41,13 @@ def load_accident_model(
     checkpoint = torch.load(resolved_path, map_location=device)
     state_dict = checkpoint["model"] if isinstance(checkpoint, dict) and "model" in checkpoint else checkpoint
 
+    # Dynamically resolve number of classes from weight matrix shape to avoid size mismatch
+    fc_weight_keys = ["model.fc.1.weight", "fc.1.weight", "model.fc.weight", "fc.weight"]
+    for key in fc_weight_keys:
+        if key in state_dict:
+            num_classes = state_dict[key].shape[0]
+            break
+
     model = CarClassifierResNet(num_classes=num_classes)
     model.load_state_dict(state_dict)
     model.to(device)

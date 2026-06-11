@@ -76,3 +76,11 @@ datasets/**
 checkpoints/
 *.ckpt
 *.weights
+
+# Local configurations
+.env
+.env.local
+.env.*.local
+
+# Downloaded pre-trained weights
+yolov8s.pt
