@@ -1,0 +1,14 @@
+* [33mcc55d35[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m Model retraining
+[31m|[m * [33m8a602d4[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Enhance README with project details and features
+[31m|[m * [33mb9dd126[m Added assets for README
+[31m|[m[31m/[m  
+* [33mbd8478f[m Updated Dashboard
+* [33m8c20600[m Remove gitattributes
+* [33m8ea3528[m Refactor repo and track large model artifacts with Git LFS
+* [33mbbbaca5[m system upgrade
+* [33m95b3522[m system upgrade
+* [33md3188d2[m Proper input based data
+* [33me90b610[m The updated model weights with new dataset
+* [33m5e8e7f6[m Final model
+* [33mba3f0c2[m Complete model
+* [33mf7c84f9[m Initial commit
